@@ -36,9 +36,9 @@ module AWS
       # @option options [String] :unit (nil) Standard unit for a given Measure. See the developer guide for valid options.
 
 
-      def get_metric_statistics ( options ={} )
+def get_metric_statistics ( options ={} )
         options = { :custom_unit => nil,
-                    :dimensions => nil,
+                    :dimensions => [],
                     :end_time => Time.now(),      #req
                     :measure_name => "",          #req
                     :namespace => "AWS/EC2",
@@ -58,7 +58,6 @@ module AWS
 
         params = {
                     "CustomUnit" => options[:custom_unit],
-                    "Dimensions" => options[:dimensions],
                     "EndTime" => options[:end_time].iso8601,
                     "MeasureName" => options[:measure_name],
                     "Namespace" => options[:namespace],
@@ -67,7 +66,10 @@ module AWS
                     "StartTime" => options[:start_time].iso8601,
                     "Unit" => options[:unit]
         }
-
+        options[:dimensions].each_with_index do |dim, i|
+          params["Dimensions.member.#{i + 1}.Name"] = dim[0]
+          params["Dimensions.member.#{i + 1}.Value"] = dim[1]
+        end
         return response_generator(:action => 'GetMetricStatistics', :params => params)
 
       end
